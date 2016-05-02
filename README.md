@@ -3,6 +3,36 @@ A HTTP Client for Swift
 
 
 ## Getting Started
+### Ubuntu
+
+```sh
+# Install build tools and libssl-dev
+sudo apt-get upgrade
+sudo apt-get install build-essential libtool libssl-dev
+sudo apt-get install automake clang
+
+# build and install libuv
+git clone https://github.com/libuv/libuv.git && cd libuv
+sh autogen.sh
+./configure
+make
+make install
+```
+
+### Mac OS X
+
+#### brew
+
+```sh
+brew install libuv
+brew link libuv --force
+```
+
+And then, add
+```swift
+.Package(url: "https://github.com/slimane-swift/Hanger.git", majorVersion: 0, minor: 1)
+```
+in to your Package.swift
 
 
 ## Usage
@@ -62,16 +92,19 @@ Loop.defaultLoop.run()
 Getting Ready
 
 
-## API Reference
+# API Reference
 
-### ClientConnection
+## ClientConnection
 
 #### Public Members
+---
+
 * closed: Bool
 * host: String
 * port: Int
 
 #### Public Methods
+---
 
 ##### initializer
 `init(loop: Loop = Loop.defaultLoop, host: String, port: Int? = nil)`
@@ -98,7 +131,10 @@ Receive data from the Stream
 
 Close the Stream handle
 
-### Hanger
+## Hanger
+
+#### Public Methods
+---
 
 ##### initializer
 `init(connection: ClientConnection, request: Request, completion: (Void throws -> Response) -> Void) throws`
@@ -107,12 +143,12 @@ Close the Stream handle
 ##### initializer
 `init(request: Request, completion: (Void throws -> Response) -> Void) throws`
 
-### Request
+## Request
 Request is Open-swift's S4
 
 Visit https://github.com/open-swift/S4 for more detail
 
-### Response
+## Response
 Response is Open-swift's S4
 
 Visit https://github.com/open-swift/S4 for more detail
