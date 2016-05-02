@@ -47,7 +47,7 @@ try! _ = Hanger(request: request) {
 }
 
 // Once need to run uv_loop
-// But if you use Hanger in a Slimane/Skelton Project Does'n need here.
+// But if you use Hanger in a Slimane/Skelton Project doesn't need here.
 Loop.defaultLoop.run()
 ```
 
