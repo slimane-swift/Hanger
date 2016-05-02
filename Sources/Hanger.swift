@@ -6,35 +6,48 @@
 //
 //
 
+
 public struct Hanger {
+
+    public init(connection: ClientConnection, request: Request, completion: (Void throws -> Response) -> Void) throws {
+        if case .Closed = connection.state {
+            throw StreamError.closedStream(data: [])
+        }
+        
+        if case .Disconnected = connection.state {
+            guard let host = request.uri.host else {
+                throw ClientError.InvalidURL
+            }
+            
+            let connection = ClientConnection(host: host, port: request.uri.port)
+            
+            try connection.open { [unowned connection] in
+                do {
+                    try $0()
+                    try writeRequest(connection: connection, request: request, completion: completion)
+                } catch {
+                    completion {
+                        try connection.close()
+                        throw error
+                    }
+                }
+            }
+        } else {
+            try writeRequest(connection: connection, request: request, completion: completion)
+        }
+    }
+    
     public init(request: Request, completion: (Void throws -> Response) -> Void) throws {
-        var request = request
-        let connection = try ClientConnection(request: request)
+        guard let host = request.uri.host else {
+            throw ClientError.InvalidURL
+        }
+        
+        let connection = ClientConnection(host: host, port: request.uri.port)
         
         try connection.open { [unowned connection] in
             do {
                 try $0()
-                try connection.send(request.buildRequest())
-                
-                let parser = ResponseParser()
-                
-                connection.receive {
-                    do {
-                        let data = try $0()
-                        if let response = try parser.parse(data) {
-                            completion {
-                                try connection.close()
-                                return response
-                            }
-                        }
-                    } catch {
-                        completion {
-                            try connection.close()
-                            throw error
-                        }
-                        
-                    }
-                }
+                try writeRequest(connection: connection, request: request, forceClose: true, completion: completion)
             } catch {
                 completion {
                     try connection.close()
@@ -42,5 +55,37 @@ public struct Hanger {
                 }
             }
         }
+    }
+}
+
+private func writeRequest(connection: ClientConnection, request: Request, forceClose: Bool = false, completion: (Void throws -> Response) -> Void) throws {
+    var request = request
+    try connection.send(request.buildRequest())
+    
+    let parser = ResponseParser()
+    
+    connection.receive { [unowned connection] in
+        do {
+            let data = try $0()
+            if let response = try parser.parse(data) {
+                completion {
+                    try closeConnection(shouldClose: forceClose || !request.isKeepAlive, connection: connection)
+                    return response
+                }
+            }
+        } catch {
+            completion {
+                try closeConnection(shouldClose: forceClose || !request.isKeepAlive, connection: connection)
+                throw error
+            }
+        }
+    }
+}
+
+private func closeConnection(shouldClose: Bool, connection: ClientConnection) throws {
+    if shouldClose {
+        try connection.close()
+    } else {
+        connection.unref()
     }
 }

@@ -14,6 +14,12 @@
 @_exported import Suv
 @_exported import CLibUv
 
+public enum ClientConnectionState {
+    case Disconnected
+    case Connected
+    case Closed
+}
+
 public final class ClientConnection: AsyncConnection {
     var _stream: TCP?
     
@@ -21,23 +27,24 @@ public final class ClientConnection: AsyncConnection {
         return _stream!
     }
     
-    var request: Request
+    public private(set) var state: ClientConnectionState = .Disconnected
     
+    public let host: String
+    
+    public let port: Int
+    
+    public init(loop: Loop = Loop.defaultLoop, host: String, port: Int? = nil) {
+        self._stream = TCP(loop: loop)
+        self.host = host
+        self.port = port ?? 80
+    }
+
     public var closed: Bool {
         return stream.isClosing()
     }
     
-    public init(loop: Loop = Loop.defaultLoop, request: Request) throws {
-        self._stream = TCP(loop: loop)
-        self.request = request
-    }
-    
-    public func open(timingOut deadline: Double, completion: (Void throws -> AsyncConnection) -> Void) throws {
-        guard let host = request.uri.host else {
-            throw ClientError.InvalidURL
-        }
-        
-        stream.connect(host: host, port: request.uri.port ?? 80) {
+    public func open(timingOut deadline: Double = .never, completion: (Void throws -> AsyncConnection) -> Void) throws {
+        stream.connect(host: host, port: port) {
             if case .Error(let error) = $0 {
                 completion {
                     throw error
@@ -45,6 +52,7 @@ public final class ClientConnection: AsyncConnection {
                 return
             }
             
+            self.state = .Connected
             completion {
                 self
             }
@@ -85,6 +93,7 @@ public final class ClientConnection: AsyncConnection {
         }
         stream.close()
         self._stream = nil
+        self.state = .Closed
     }
     
     public func unref() {
