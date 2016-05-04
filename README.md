@@ -67,7 +67,7 @@ import Hanger
 let request = Request(method: .get, uri: URI(scheme: "http", host: "miketokyo.com", headers: ["Connection": "Keep-Alive"]))
 
 // Initialize a connection
-let con = ClientConnection(host: request.uri.host!)
+let con = ClientConnection(uri: request.uri)
 
 try! _ = Hanger(connection: con, request: request) {
     let response = try! $0()
@@ -107,7 +107,7 @@ Getting Ready
 ---
 
 ##### initializer
-`init(loop: Loop = Loop.defaultLoop, host: String, port: Int? = nil)`
+`init(loop: Loop = Loop.defaultLoop, uri: URI)`
 
 ##### open
 `func(timingOut deadline: Double = .never, completion: (Void throws -> AsyncConnection) -> Void) throws`
@@ -144,12 +144,12 @@ Close the Stream handle
 `init(request: Request, completion: (Void throws -> Response) -> Void) throws`
 
 ## Request
-Request is Open-swift's S4
+Request is Open-swift's S4.Request
 
 Visit https://github.com/open-swift/S4 for more detail
 
 ## Response
-Response is Open-swift's S4
+Response is Open-swift's S4.Response
 
 Visit https://github.com/open-swift/S4 for more detail
 
