@@ -15,13 +15,9 @@ public struct Hanger {
         }
         
         if case .Disconnected = connection.state {
-            guard let host = request.uri.host else {
-                throw ClientError.InvalidURL
-            }
+            let connection = ClientConnection(uri: request.uri)
             
-            let connection = ClientConnection(host: host, port: request.uri.port)
-            
-            try connection.open { [unowned connection] in
+            try connection.open {
                 do {
                     try $0()
                     try writeRequest(connection: connection, request: request, completion: completion)
@@ -38,13 +34,9 @@ public struct Hanger {
     }
     
     public init(request: Request, completion: (Void throws -> Response) -> Void) throws {
-        guard let host = request.uri.host else {
-            throw ClientError.InvalidURL
-        }
+        let connection = ClientConnection(uri: request.uri)
         
-        let connection = ClientConnection(host: host, port: request.uri.port)
-        
-        try connection.open { [unowned connection] in
+        try connection.open {
             do {
                 try $0()
                 try writeRequest(connection: connection, request: request, forceClose: true, completion: completion)

@@ -13,7 +13,7 @@ extension Request {
         
         if headers["Host"].first == nil {
             var host = uri.host!
-            var port = uri.port ?? 80
+            let port = uri.port ?? 80
             if port != 80 {
                 host+=":\(port)"
             }

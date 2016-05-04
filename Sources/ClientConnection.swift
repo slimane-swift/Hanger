@@ -29,14 +29,11 @@ public final class ClientConnection: AsyncConnection {
     
     public private(set) var state: ClientConnectionState = .Disconnected
     
-    public let host: String
+    public let uri: URI
     
-    public let port: Int
-    
-    public init(loop: Loop = Loop.defaultLoop, host: String, port: Int? = nil) {
+    public init(loop: Loop = Loop.defaultLoop, uri: URI) {
         self._stream = TCP(loop: loop)
-        self.host = host
-        self.port = port ?? 80
+        self.uri = uri
     }
 
     public var closed: Bool {
@@ -44,7 +41,7 @@ public final class ClientConnection: AsyncConnection {
     }
     
     public func open(timingOut deadline: Double = .never, completion: (Void throws -> AsyncConnection) -> Void) throws {
-        stream.connect(host: host, port: port) {
+        stream.connect(host: self.uri.host ?? "0.0.0.0", port: self.uri.port ?? 80) {
             if case .Error(let error) = $0 {
                 completion {
                     throw error
