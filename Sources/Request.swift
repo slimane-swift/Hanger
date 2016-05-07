@@ -6,9 +6,10 @@
 //
 //
 
+let CRLF = "\r\n"
+
 extension Request {
-    mutating func buildRequest() throws -> Data {
-        let CRLF = "\r\n"
+    public mutating func serialize() throws -> Data {
         var requestData = "\(method) \(path ?? "/") HTTP/\(version.major).\(version.minor)\(CRLF)"
         
         if headers["Host"].first == nil {

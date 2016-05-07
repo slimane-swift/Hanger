@@ -52,7 +52,7 @@ public struct Hanger {
 
 private func writeRequest(connection: ClientConnection, request: Request, forceClose: Bool = false, completion: (Void throws -> Response) -> Void) throws {
     var request = request
-    try connection.send(request.buildRequest())
+    try connection.send(request.serialize())
     
     let parser = ResponseParser()
     
