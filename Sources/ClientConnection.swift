@@ -40,7 +40,7 @@ public final class ClientConnection: AsyncConnection {
         return stream.isClosing()
     }
     
-    public func open(timingOut deadline: Double = .never, completion: (Void throws -> AsyncConnection) -> Void) throws {
+    public func open(timingOut deadline: Double = .never, completion: ((Void) throws -> AsyncConnection) -> Void) throws {
         stream.connect(host: self.uri.host ?? "0.0.0.0", port: self.uri.port ?? 80) {
             if case .Error(let error) = $0 {
                 completion {
@@ -56,7 +56,7 @@ public final class ClientConnection: AsyncConnection {
         }
     }
     
-    public func send(_ data: Data, timingOut deadline: Double = .never, completion result: (Void throws -> Void) -> Void = { _ in}) {
+    public func send(_ data: Data, timingOut deadline: Double = .never, completion result: ((Void) throws -> Void) -> Void = { _ in}) {
         stream.write(buffer: data.bufferd) { res in
             result {
                 if case .Error(let error) = res {
@@ -66,7 +66,7 @@ public final class ClientConnection: AsyncConnection {
         }
     }
     
-    public func receive(upTo byteCount: Int = 2048 /* ignored */, timingOut deadline: Double = .never, completion result: (Void throws -> Data) -> Void) {
+    public func receive(upTo byteCount: Int = 2048 /* ignored */, timingOut deadline: Double = .never, completion result: ((Void) throws -> Data) -> Void) {
         stream.read { res in
             if case .Data(let buf) = res {
                 result {
@@ -97,7 +97,7 @@ public final class ClientConnection: AsyncConnection {
         stream.unref()
     }
     
-    public func flush(timingOut deadline: Double, completion result: (Void throws -> Void) -> Void = {_ in }) {
+    public func flush(timingOut deadline: Double, completion result: ((Void) throws -> Void) -> Void = {_ in }) {
         // noop
     }
 }

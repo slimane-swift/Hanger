@@ -9,7 +9,7 @@
 
 public struct Hanger {
 
-    public init(connection: ClientConnection, request: Request, completion: (Void throws -> Response) -> Void) throws {
+    public init(connection: ClientConnection, request: Request, completion: ((Void) throws -> Response) -> Void) throws {
         if case .Closed = connection.state {
             throw StreamError.closedStream(data: [])
         }
@@ -33,7 +33,7 @@ public struct Hanger {
         }
     }
     
-    public init(request: Request, completion: (Void throws -> Response) -> Void) throws {
+    public init(request: Request, completion: ((Void) throws -> Response) -> Void) throws {
         let connection = ClientConnection(uri: request.uri)
         
         try connection.open {
@@ -50,7 +50,7 @@ public struct Hanger {
     }
 }
 
-private func writeRequest(connection: ClientConnection, request: Request, forceClose: Bool = false, completion: (Void throws -> Response) -> Void) throws {
+private func writeRequest(connection: ClientConnection, request: Request, forceClose: Bool = false, completion: ((Void) throws -> Response) -> Void) throws {
     var request = request
     try connection.send(request.serialize())
     
