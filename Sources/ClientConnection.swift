@@ -20,7 +20,11 @@ public enum ClientConnectionState {
     case Closed
 }
 
-public final class ClientConnection: AsyncConnection {
+public protocol HTTPConnection: AsyncConnection {
+    var state: ClientConnectionState { get }
+}
+
+public final class ClientConnection: HTTPConnection {
     var _stream: TCP?
     
     var stream: TCP {
